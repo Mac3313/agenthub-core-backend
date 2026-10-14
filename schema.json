@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org",
+  "title": "AgentHubOrchestrationPayload",
+  "description": "Strict data contract for asynchronous multi-component message routing across FastAPI, OpenAI, and Viktor API.",
+  "type": "object",
+  "required": [
+    "conversation_id",
+    "routing_state",
+    "message_envelope",
+    "viktor_tool_layer",
+    "telemetry"
+  ],
+  "properties": {
+    "conversation_id": { "type": "string", "format": "uuid" },
+    "routing_state": {
+      "type": "string",
+      "enum": [
+        "AWAITING_FASTAPI_INGEST",
+        "PENDING_LLM_REASONING",
+        "EXECUTING_VIKTOR_WORKER",
+        "STREAMING_TO_CLIENT",
+        "PIPELINE_FAILED"
+      ]
+    },
+    "message_envelope": {
+      "type": "object",
+      "required": ["role", "content", "model_frozen_signature"],
+      "properties": {
+        "role": { "type": "string", "enum": ["user", "assistant", "system", "tool"] },
+        "content": { "type": "string" },
+        "model_frozen_signature": { "type": "string" }
+      }
+    },
+    "viktor_tool_layer": {
+      "type": "object",
+      "required": ["workspace_id", "action_function", "input_parameters", "execution_state"],
+      "properties": {
+        "workspace_id": { "type": "integer", "minimum": 1 },
+        "action_function": { "type": "string" },
+        "input_parameters": { "type": "object", "additionalProperties": true },
+        "execution_state": {
+          "type": "object",
+          "required": ["status_code", "runtime_exception"],
+          "properties": {
+            "status_code": { "type": "integer" },
+            "runtime_exception": { "type": ["string", "null"] }
+          }
+        }
+      }
+    },
+    "telemetry": {
+      "type": "object",
+      "required": ["timestamp_utc", "latency_ms"],
+      "properties": {
+        "timestamp_utc": { "type": "string", "format": "date-time" },
+        "latency_ms": { "type": "integer", "minimum": 0 }
+      }
+    }
+  },
+  "additionalProperties": false
+}
