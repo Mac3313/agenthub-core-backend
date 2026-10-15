@@ -1,5 +1,4 @@
 services:
-  # 1. Main FastAPI Web Service (Tier 3 Stack)
   - type: web
     name: agenthub-core-api
     runtime: python
@@ -17,7 +16,6 @@ services:
           name: agenthub-production-db
           property: connectionString
 
-  # 2. Tier 2 Background Worker for Orchestration & Webhook Pipelines
   - type: worker
     name: agenthub-async-worker
     runtime: python
@@ -38,8 +36,9 @@ services:
           name: agenthub-core-api
           envVar: FERNET_SECRET_KEY
 
-# 3. Production Managed PostgreSQL Database
 databases:
   - name: agenthub-production-db
-    plan: flexible
+    plan: starter
     region: frankfurt
+ 
+  
