@@ -1,0 +1,45 @@
+services:
+  # 1. Main FastAPI Web Service (Tier 3 Stack)
+  - type: web
+    name: agenthub-core-api
+    runtime: python
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "uvicorn main:app --host 0.0.0.0 --port $PORT"
+    plan: starter
+    region: frankfurt
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: FERNET_SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: agenthub-production-db
+          property: connectionString
+
+  # 2. Tier 2 Background Worker for Orchestration & Webhook Pipelines
+  - type: worker
+    name: agenthub-async-worker
+    runtime: python
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "python -m app.workers.webhook_processor"
+    plan: starter
+    region: frankfurt
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: DATABASE_URL
+        fromDatabase:
+          name: agenthub-production-db
+          property: connectionString
+      - key: FERNET_SECRET_KEY
+        fromService:
+          type: web
+          name: agenthub-core-api
+          envVar: FERNET_SECRET_KEY
+
+# 3. Production Managed PostgreSQL Database
+databases:
+  - name: agenthub-production-db
+    plan: flexible
+    region: frankfurt
