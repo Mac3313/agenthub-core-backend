@@ -34,11 +34,9 @@ services:
         fromService:
           type: web
           name: agenthub-core-api
-          value: envVar
-          envVar: FERNET_SECRET_KEY
+          envVarKey: FERNET_SECRET_KEY
 
 databases:
   - name: agenthub-production-db
     plan: starter
     region: frankfurt
-  
